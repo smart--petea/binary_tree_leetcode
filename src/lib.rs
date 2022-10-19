@@ -28,35 +28,28 @@ impl TreeNode {
 }
 
 impl TreeNode {
-    pub fn preorder_traversal_recursive(&self, acc: &mut String) {
-        acc.push(self.val);
-
-        if let Some(left_rc) = self.left.as_ref() {
-            left_rc.borrow().preorder_traversal_recursive(acc);
+    pub fn preorder_traversal_recursive(node: &WrappedTreeNode, acc: &mut String) {
+        if node.is_none() {
+            return;
         }
 
-        if let Some(right_rc) = self.right.as_ref() {
-            right_rc.borrow().preorder_traversal_recursive(acc);
-        }
+        let node = (*node.as_ref().unwrap()).borrow();
+        acc.push(node.val);
+        TreeNode::preorder_traversal_recursive(&node.left, acc);
+        TreeNode::preorder_traversal_recursive(&node.right, acc);
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::borrow::Borrow;
-
     use super::*;
 
     #[test]
     fn preorder_traversal_recursive() {
         let mut output = String::new();
-        ( 
-            *create_traversal_tree()
-            .unwrap()
-         )
-            .borrow()
-            .preorder_traversal_recursive(&mut output);
-        let expected = "ABXEMSWTPNrCH".to_string();
+        let root = create_traversal_tree();
+        TreeNode::preorder_traversal_recursive(&root, &mut output);
+        let expected = "ABXEMSWTPNCH".to_string();
         assert_eq!(output, expected);
     }
 
