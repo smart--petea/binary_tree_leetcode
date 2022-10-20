@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::rc::Rc;
 use std::cell::RefCell;
 
@@ -33,10 +34,27 @@ impl TreeNode {
             return;
         }
 
-        let node = (*node.as_ref().unwrap()).borrow();
+        let node = (*(*node.as_ref().unwrap())).borrow();
         acc.push(node.val);
         TreeNode::preorder_traversal_recursive(&node.left, acc);
         TreeNode::preorder_traversal_recursive(&node.right, acc);
+    }
+
+    pub fn preorder_traversal_iterative(node: WrappedTreeNode, acc: &mut String) {
+        let mut stack: Vec<WrappedTreeNode> = vec![node];
+
+        while let Some(Some(rc)) = stack.pop() {
+            let inner = (*rc).borrow();
+            acc.push(inner.val);
+
+            if let Some(ref right_rc) = inner.right {
+                stack.push(Some(right_rc.clone()));
+            }
+
+            if let Some(ref left_rc) = inner.left {
+                stack.push(Some(left_rc.clone()));
+            }
+        }
     }
 }
 
@@ -49,6 +67,15 @@ mod tests {
         let mut output = String::new();
         let root = create_traversal_tree();
         TreeNode::preorder_traversal_recursive(&root, &mut output);
+        let expected = "ABXEMSWTPNCH".to_string();
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn preorder_traversal_iterative() {
+        let mut output = String::new();
+        let root = create_traversal_tree();
+        TreeNode::preorder_traversal_iterative(root, &mut output);
         let expected = "ABXEMSWTPNCH".to_string();
         assert_eq!(output, expected);
     }
