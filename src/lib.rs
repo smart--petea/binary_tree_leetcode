@@ -56,6 +56,17 @@ impl TreeNode {
             }
         }
     }
+
+    pub fn inorder_traversal_recursive(node: &WrappedTreeNode, acc: &mut String) {
+        if node.is_none() {
+            return;
+        }
+
+        let node = (*(*node.as_ref().unwrap())).borrow();
+        TreeNode::inorder_traversal_recursive(&node.left, acc);
+        acc.push(node.val);
+        TreeNode::inorder_traversal_recursive(&node.right, acc);
+    }
 }
 
 #[cfg(test)]
@@ -77,6 +88,15 @@ mod tests {
         let root = create_traversal_tree();
         TreeNode::preorder_traversal_iterative(root, &mut output);
         let expected = "ABXEMSWTPNCH".to_string();
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn inorder_traversal_recursive() {
+        let mut output = String::new();
+        let root = create_traversal_tree();
+        TreeNode::inorder_traversal_recursive(&root, &mut output);
+        let expected = "EXMBSAPTNWHC".to_string();
         assert_eq!(output, expected);
     }
 
