@@ -67,6 +67,28 @@ impl TreeNode {
         acc.push(node.val);
         TreeNode::inorder_traversal_recursive(&node.right, acc);
     }
+
+    pub fn inorder_traversal_iterative(node: Option<Rc<RefCell<TreeNode>>>, acc: &mut String) {
+        if node.is_none() {
+            return;
+        }
+
+        let mut stack: Vec<Rc<RefCell<TreeNode>>> = vec![];
+        let mut current = node; 
+        while !stack.is_empty() || current.is_some() {
+            while let Some(current_rc) = current {
+                stack.push(current_rc.clone());
+                current = (*current_rc).borrow().left.clone();
+            }
+
+            if let Some(rc) = stack.pop() {
+                let tree_node = (*rc).borrow();
+                acc.push(tree_node.val);
+
+                current = tree_node.right.clone();
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -96,6 +118,15 @@ mod tests {
         let mut output = String::new();
         let root = create_traversal_tree();
         TreeNode::inorder_traversal_recursive(&root, &mut output);
+        let expected = "EXMBSAPTNWHC".to_string();
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn inorder_traversal_iterative() {
+        let mut output = String::new();
+        let root = create_traversal_tree();
+        TreeNode::inorder_traversal_iterative(root, &mut output);
         let expected = "EXMBSAPTNWHC".to_string();
         assert_eq!(output, expected);
     }
