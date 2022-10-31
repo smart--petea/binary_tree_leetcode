@@ -1,6 +1,7 @@
 use std::borrow::Borrow;
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::cell::Ref;
 
 type WrappedTreeNode = Option<Rc<RefCell<TreeNode>>>;
 
@@ -89,6 +90,16 @@ impl TreeNode {
             }
         }
     }
+
+    pub fn postorder_traversal_recursive(node: &WrappedTreeNode, acc: &mut String) {
+        if let Some(node_rc) = node {
+            let inner: Ref<TreeNode> = (**node_rc).borrow();
+            Self::postorder_traversal_recursive(&inner.left, acc);
+            Self::postorder_traversal_recursive(&inner.right, acc);
+
+            acc.push(inner.val);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -128,6 +139,15 @@ mod tests {
         let root = create_traversal_tree();
         TreeNode::inorder_traversal_iterative(root, &mut output);
         let expected = "EXMBSAPTNWHC".to_string();
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn postorder_traversal_recursive() {
+        let mut output = String::new();
+        let root = create_traversal_tree();
+        TreeNode::postorder_traversal_recursive(&root, &mut output);
+        let expected = "EMXSBPNTHCWA".to_string();
         assert_eq!(output, expected);
     }
 
