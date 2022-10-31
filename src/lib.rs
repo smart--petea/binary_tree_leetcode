@@ -100,6 +100,31 @@ impl TreeNode {
             acc.push(inner.val);
         }
     }
+
+    pub fn postorder_traversal_iterative(node: WrappedTreeNode, acc: &mut String) {
+        let mut stack: Vec<Rc<RefCell<TreeNode>>> = Vec::new();
+        let mut last_visited: Option<Rc<RefCell<TreeNode>>> = None;
+        let mut current: Option<Rc<RefCell<TreeNode>>> = node;
+
+        while !stack.is_empty() || current.is_some() {
+            while let Some(current_rc) = current {
+                stack.push(current_rc.clone());
+                current = (*current_rc).borrow().left.clone();
+            }
+
+            if let Some(stack_rc) = stack.pop() {
+                let inner = (*stack_rc).borrow();
+
+                if inner.right.is_none() || inner.right == last_visited {
+                    last_visited = Some(stack_rc.clone());
+                    acc.push(inner.val);
+                } else {
+                    stack.push(stack_rc.clone());
+                    current = inner.right.clone();
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -147,6 +172,15 @@ mod tests {
         let mut output = String::new();
         let root = create_traversal_tree();
         TreeNode::postorder_traversal_recursive(&root, &mut output);
+        let expected = "EMXSBPNTHCWA".to_string();
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn postorder_traversal_iterative() {
+        let mut output = String::new();
+        let root = create_traversal_tree();
+        TreeNode::postorder_traversal_iterative(root, &mut output);
         let expected = "EMXSBPNTHCWA".to_string();
         assert_eq!(output, expected);
     }
