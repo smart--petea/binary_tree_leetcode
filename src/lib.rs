@@ -2,6 +2,7 @@ use std::borrow::Borrow;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::cell::Ref;
+use std::collections::VecDeque;
 
 type WrappedTreeNode = Option<Rc<RefCell<TreeNode>>>;
 
@@ -125,6 +126,29 @@ impl TreeNode {
             }
         }
     }
+
+    pub fn level_order_traversal_iterative(root: Option<Rc<RefCell<TreeNode>>>, acc: &mut String) {
+        if root.is_none() {
+            return;
+        }
+
+        let mut fifo: VecDeque<Rc<RefCell<TreeNode>>> = VecDeque::new();
+        fifo.push_front(root.unwrap());
+
+        while let Some(rc) = fifo.pop_back() {
+            let inner: Ref<TreeNode> = (*rc).borrow();
+
+            acc.push(inner.val);
+
+            if let Some(ref left_rc) = inner.left {
+                fifo.push_front(left_rc.clone());
+            }
+
+            if let Some(ref right_rc) = inner.right {
+                fifo.push_front(right_rc.clone());
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -182,6 +206,15 @@ mod tests {
         let root = create_traversal_tree();
         TreeNode::postorder_traversal_iterative(root, &mut output);
         let expected = "EMXSBPNTHCWA".to_string();
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn level_order_traversal_iterative() {
+        let mut output = String::new();
+        let root = create_traversal_tree();
+        TreeNode::level_order_traversal_iterative(root, &mut output);
+        let expected = "ABWXSTCEMPNH".to_string();
         assert_eq!(output, expected);
     }
 
